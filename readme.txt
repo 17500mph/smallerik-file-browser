@@ -3,7 +3,7 @@ Contributors: smallerik
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=Y9YQWWCLEC67G
 Tags: file browser repository personal-area
 Requires at least: 3.0
-Tested up to: 3.3.2
+Tested up to: 3.4
 Stable tag: 1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
