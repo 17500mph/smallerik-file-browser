@@ -3,8 +3,8 @@ Contributors: smallerik
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=Y9YQWWCLEC67G
 Tags: file browser repository personal-area
 Requires at least: 3.0
-Tested up to: 3.4
-Stable tag: 1.0
+Tested up to: 3.8.2
+Stable tag: 1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,11 @@ Please notice that the repository will only be displayed when the article is vie
 1. Using a shortcode to display a file repository
 
 == Changelog ==
+
+= Version 1.1 =
+
+* Fixed call by reference error on new versions of PHP
+* Better display of action icons that appeared very small on certain templates
 
 = Version 1.0 =
 
