@@ -45,17 +45,17 @@ Please notice that the repository will only be displayed when the article is vie
 
 == Changelog ==
 
-= 1.1 =
+= Version 1.1 =
 
 * Fixed call by reference error on new versions of PHP
 * Better display of action icons that appeared very small on certain templates
 
-= 1.0 =
+= Version 1.0 =
 
 * Initial revision
 
 == Upgrade Notice ==
 
-= 1.1 =
-This version fixes the fatal error Call By Reference on new PHP versions
+= Version 1.1 =
+This version fixes a fatal error Call By Reference on new PHP versions
 
