@@ -237,7 +237,7 @@ function wpfib_create_menu()
 }
 
 // this function blocks access to non-trusted authors accessing the backend parameters
-function wpfib_user_unauthorized($text)
+function wpfib_user_unauthorized(&$text)
 {
 	$permissions_options = get_option('wpfib_permissions_options');
 	if (empty($permissions_options['trusted_authors']))
@@ -298,7 +298,7 @@ function wpfib_general_page_callback()
 		<h2>Smallerik File Browser</h2>
 		<?php
 			$unauthorized_text = "";
-			if (wpfib_user_unauthorized(&$unauthorized_text))
+			if (wpfib_user_unauthorized($unauthorized_text))
 			{
 				echo $unauthorized_text."</div>";
 				return;
@@ -323,7 +323,7 @@ function wpfib_levels_page_callback()
 		<h2>Smallerik File Browser</h2>
 		<?php
 			$unauthorized_text = "";
-			if (wpfib_user_unauthorized(&$unauthorized_text))
+			if (wpfib_user_unauthorized($unauthorized_text))
 			{
 				echo $unauthorized_text."</div>";
 				return;
@@ -348,7 +348,7 @@ function wpfib_permissions_page_callback()
 		<h2>Smallerik File Browser</h2>
 		<?php
 			$unauthorized_text = "";
-			if (wpfib_user_unauthorized(&$unauthorized_text))
+			if (wpfib_user_unauthorized($unauthorized_text))
 			{
 				echo $unauthorized_text."</div>";
 				return;
@@ -373,7 +373,7 @@ function wpfib_display_page_callback()
 		<h2>Smallerik File Browser</h2>
 		<?php
 			$unauthorized_text = "";
-			if (wpfib_user_unauthorized(&$unauthorized_text))
+			if (wpfib_user_unauthorized($unauthorized_text))
 			{
 				echo $unauthorized_text."</div>";
 				return;
@@ -398,7 +398,7 @@ function wpfib_looks_page_callback()
 		<h2>Smallerik File Browser</h2>
 		<?php
 			$unauthorized_text = "";
-			if (wpfib_user_unauthorized(&$unauthorized_text))
+			if (wpfib_user_unauthorized($unauthorized_text))
 			{
 				echo $unauthorized_text."</div>";
 				return;
@@ -423,7 +423,7 @@ function wpfib_advanced_page_callback()
 		<h2>Smallerik File Browser</h2>
 		<?php
 			$unauthorized_text = "";
-			if (wpfib_user_unauthorized(&$unauthorized_text))
+			if (wpfib_user_unauthorized($unauthorized_text))
 			{
 				echo $unauthorized_text."</div>";
 				return;
@@ -514,7 +514,7 @@ function wpfib_about_page_callback()
 			."of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the <a href='http://www.gnu.org/licenses' target='_blank'>GNU General Public "
 			."License</a> for more details."
 			."<br /><br />"
-			."Copyright © 2012  Enrico Sandoli", "wpfib");
+			."Copyright © 2012-2014  Enrico Sandoli", "wpfib");
 		
 		echo "<p>".$about_text."</p>";
 		echo "</div>";

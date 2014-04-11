@@ -3,14 +3,14 @@
 Plugin Name: Smallerik File Browser
 Plugin URI: http://www.smallerik.com/index.php/wordpress-plugins/smallerik-file-browser
 Description: This plugin enables (authorized) users to <strong>embed a file repository inside a standard Wordpress page or post</strong>. File repositories point to a specific area of the filesystem (inside or outside of the web root). The same page or post <strong>can optionally be made to display a different file repository for each user</strong>, thus obtaining a personal area for each user. Access level restrictions to actions such as upload, delete, rename, unzip, etc. can be set for each user or set of users of the repository.
-Version: 1.0
+Version: 1.1
 Author: Enrico Sandoli
 Author URI: http://www.smallerik.com/
 License: GPLv2 or later
 */
 
 /*
- * Copyright 2012 Enrico Sandoli (email: wordpress@smallerik.com)
+ * Copyright 2012-2014 Enrico Sandoli (email: wordpress@smallerik.com)
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Publi License as published by
@@ -86,7 +86,7 @@ include_once plugin_dir_path(__FILE__).'includes/options.php';
 register_activation_hook(__FILE__, 'wpfib_add_defaults_callback');
 
 // global variables
-$wpfib_version_number = "1.0";
+$wpfib_version_number = "1.1";
 
 // Enable output character encoding conversion only for this page ***
 // http://it2.php.net/manual/en/mbstring.http.php
@@ -141,7 +141,7 @@ function wpfib_shortcode_handler($atts, $content = null)
 	$error_text = "";
 	
 	// initialise all options parameters
-	wpfib_init_options(&$atts);
+	wpfib_init_options($atts);
 
 	// load CSS and JS
 	
@@ -161,20 +161,20 @@ function wpfib_shortcode_handler($atts, $content = null)
 	wpfib_get_userdata();
 	
 	// check if the post/page is ok for displaying a repository (single post or list of them)
-//	if (!wpfib_page_or_post_check_passed(&$error_text))
+//	if (!wpfib_page_or_post_check_passed($error_text))
 //	{
 //		return $text.$error_text;
 //	}
 
 	// check if the post/page was written by a trusted author
-	if (!wpfib_trusted_author_check_passed(&$error_text))
+	if (!wpfib_trusted_author_check_passed($error_text))
 	{
 		return $text.$error_text;
 	}
 
 	// set/get the repository path variables
 	$repo_abspath = "";
-	if (!wpfib_get_repository_path(&$repo_abspath, &$error_text))
+	if (!wpfib_get_repository_path($repo_abspath, $error_text))
 	{
 		return $text.$error_text;
 	}
@@ -183,14 +183,14 @@ function wpfib_shortcode_handler($atts, $content = null)
 	wpfib_get_access_rights();
 
 	// check if the current user has enough permissions to display the repository
-	if (!wpfib_can_display_repo(&$error_text))
+	if (!wpfib_can_display_repo($error_text))
 	{
 		return $text.$error_text;
 	}
 
 	// validate (and get) the current location curdir_relpath: this is the path of the current location, relative to the repo_abspath
 	$curdir_relpath = "";
-	if (!wpfib_get_current_location(&$curdir_relpath, $repo_abspath, &$error_text))
+	if (!wpfib_get_current_location($curdir_relpath, $repo_abspath, $error_text))
 	{
 		return $text.$error_text;
 	}
@@ -203,10 +203,10 @@ function wpfib_shortcode_handler($atts, $content = null)
 
 	// manage user actions will call separate functions for each individual action
 	// this function also manages all redirects and error/warning/success boxes display
-	wpfib_actions_handler(&$text, $repo_abspath, $curdir_relpath);
+	wpfib_actions_handler($text, $repo_abspath, $curdir_relpath);
 		
 	// display repository will call separate functions to render each div section of the repository
-	if (!wpfib_display_repository(&$text, $repo_abspath, $curdir_relpath, &$error_text))
+	if (!wpfib_display_repository($text, $repo_abspath, $curdir_relpath, $error_text))
 	{
 		return $text.$error_text;
 	}
@@ -222,7 +222,7 @@ function wpfib_shortcode_handler($atts, $content = null)
 	return $text;
 }
 
-function wpfib_init_options($atts)
+function wpfib_init_options(&$atts)
 {
 	global $wpfib_options;
 	global $wpfib_imgdirNavigation;
@@ -573,7 +573,7 @@ function wpfib_access_rights_for_level_name($level_name)
 	return $access_rights;
 }
 
-function wpfib_can_display_repo($error_text)
+function wpfib_can_display_repo(&$error_text)
 {
 	global $wpfib_access_rights;
 	global $wpfib_imgdirNavigation;
@@ -592,7 +592,7 @@ function wpfib_can_display_repo($error_text)
 	}
 }
 
-function wpfib_trusted_author_check_passed($error_text)
+function wpfib_trusted_author_check_passed(&$error_text)
 {
 	global $wpfib_options;
 	global $wpfib_imgdirNavigation;
@@ -632,7 +632,7 @@ function wpfib_trusted_author_check_passed($error_text)
 }
 
 
-function wpfib_page_or_post_check_passed($error_text)
+function wpfib_page_or_post_check_passed(&$error_text)
 {
 	global $wpfib_options;
 	global $wpfib_imgdirNavigation;
@@ -683,7 +683,7 @@ function wpfib_needs_to_reload_with_cookie($curdir_relpath)
 	return false;
 }
 
-function wpfib_get_repository_path($repo_abspath, $error_text)
+function wpfib_get_repository_path(&$repo_abspath, &$error_text)
 {
 	// ***********************************************************************************************************************
 	// MANAGE REPOSITORY INFO
@@ -826,7 +826,7 @@ function wpfib_get_repository_path($repo_abspath, $error_text)
 
 
 // this function will detect the current location and validate it against the repository path
-function wpfib_get_current_location($curdir_relpath, $repo_abspath, $error_text)
+function wpfib_get_current_location(&$curdir_relpath, $repo_abspath, &$error_text)
 {
 	global $wpfib_options;
 	
@@ -857,7 +857,7 @@ function wpfib_get_current_location($curdir_relpath, $repo_abspath, $error_text)
 	return true;
 }
 
-function wpfib_action_downloadfile($repo_abspath, $curdir_relpath, $returned_text, $text_type)
+function wpfib_action_downloadfile($repo_abspath, $curdir_relpath, &$returned_text, &$text_type)
 {
 	$dir = $repo_abspath.DS.$curdir_relpath;
 	$download_file = wpfib_path_decode($_GET['download_file']);
@@ -904,7 +904,7 @@ function wpfib_action_downloadfile($repo_abspath, $curdir_relpath, $returned_tex
 	return ACTION_NEEDS_RELOAD;
 }
 
-function wpfib_action_delfolder($repo_abspath, $curdir_relpath, $returned_text, $text_type)
+function wpfib_action_delfolder($repo_abspath, $curdir_relpath, &$returned_text, &$text_type)
 {
 	$dir = $repo_abspath.DS.$curdir_relpath;
 	$delfolder = wpfib_path_decode($_GET['delfolder']);
@@ -939,7 +939,7 @@ function wpfib_action_delfolder($repo_abspath, $curdir_relpath, $returned_text, 
 	return ACTION_NEEDS_RELOAD;
 }
 
-function wpfib_action_delfile($repo_abspath, $curdir_relpath, $returned_text, $text_type)
+function wpfib_action_delfile($repo_abspath, $curdir_relpath, &$returned_text, &$text_type)
 {
 	global $wpfib_options;
 	
@@ -982,7 +982,7 @@ function wpfib_action_delfile($repo_abspath, $curdir_relpath, $returned_text, $t
 	return ACTION_NEEDS_RELOAD;
 }
 
-function wpfib_action_renfolder($repo_abspath, $curdir_relpath, $returned_text, $text_type)
+function wpfib_action_renfolder($repo_abspath, $curdir_relpath, &$returned_text, &$text_type)
 {
 	global $wpfib_options;
 	
@@ -1018,7 +1018,7 @@ function wpfib_action_renfolder($repo_abspath, $curdir_relpath, $returned_text, 
 	return ACTION_NEEDS_RELOAD;
 }
 
-function wpfib_action_renfile($repo_abspath, $curdir_relpath, $returned_text, $text_type)
+function wpfib_action_renfile($repo_abspath, $curdir_relpath, &$returned_text, &$text_type)
 {
 	global $wpfib_options;
 	
@@ -1058,7 +1058,7 @@ function wpfib_action_renfile($repo_abspath, $curdir_relpath, $returned_text, $t
 	return ACTION_NEEDS_RELOAD;
 }
 
-function wpfib_action_newfolder($repo_abspath, $curdir_relpath, $returned_text, $text_type)
+function wpfib_action_newfolder($repo_abspath, $curdir_relpath, &$returned_text, &$text_type)
 {
 	global $wpfib_default_dir_chmod;
 	
@@ -1102,7 +1102,7 @@ function wpfib_action_newfolder($repo_abspath, $curdir_relpath, $returned_text, 
 }
 			
 // HTML upload : manage conflict
-function wpfib_action_html_upload_manage_conflict($repo_abspath, $curdir_relpath, $returned_text, $text_type)
+function wpfib_action_html_upload_manage_conflict($repo_abspath, $curdir_relpath, &$returned_text, &$text_type)
 {
 	global $wpfib_access_rights;
 	global $wpfib_options;
@@ -1203,7 +1203,7 @@ function wpfib_action_html_upload_manage_conflict($repo_abspath, $curdir_relpath
 }
 
 // HTML upload : receive file
-function wpfib_action_html_upload_main_handler($repo_abspath, $curdir_relpath, $returned_text, $text_type)
+function wpfib_action_html_upload_main_handler($repo_abspath, $curdir_relpath, &$returned_text, &$text_type)
 {
 	global $wpfib_access_rights;
 	global $wpfib_options;
@@ -1281,7 +1281,7 @@ function wpfib_action_html_upload_main_handler($repo_abspath, $curdir_relpath, $
 	return ACTION_NEEDS_RELOAD;
 }
 
-function wpfib_action_restorefile($repo_abspath, $curdir_relpath, $returned_text, $text_type)
+function wpfib_action_restorefile($repo_abspath, $curdir_relpath, &$returned_text, &$text_type)
 {
 	global $wpfib_options;
 	global $wpfib_default_file_chmod;
@@ -1308,7 +1308,7 @@ function wpfib_action_restorefile($repo_abspath, $curdir_relpath, $returned_text
 	return ACTION_NEEDS_RELOAD;
 }
 
-function wpfib_action_unzipfile($repo_abspath, $curdir_relpath, $returned_text, $text_type)
+function wpfib_action_unzipfile($repo_abspath, $curdir_relpath, &$returned_text, &$text_type)
 {
 	global $wpfib_options;
 	global $wpfib_default_file_chmod;
@@ -1336,7 +1336,7 @@ function wpfib_action_unzipfile($repo_abspath, $curdir_relpath, $returned_text, 
 	return ACTION_NEEDS_RELOAD;
 }
 
-function wpfib_actions_handler($text, $repo_abspath, $curdir_relpath)
+function wpfib_actions_handler(&$text, $repo_abspath, $curdir_relpath)
 {
 	global $wpfib_access_rights;
 	global $wpfib_baselink;
@@ -1352,63 +1352,63 @@ function wpfib_actions_handler($text, $repo_abspath, $curdir_relpath)
 	// managing file download
 	if($wpfib_access_rights[CAN_DOWNLOAD] && isset($_GET['download_file']) && strlen($_GET['download_file']))
 	{
-		$returned_value = wpfib_action_downloadfile($repo_abspath, $curdir_relpath, &$returned_text, &$text_type);
+		$returned_value = wpfib_action_downloadfile($repo_abspath, $curdir_relpath, $returned_text, $text_type);
 	}
 
 	// deleting a folder
 	else if ($wpfib_access_rights[CAN_DELETE_FOLDERS] && isset($_GET["delfolder"]) && strlen($_GET["delfolder"]))
 	{
-		$returned_value = wpfib_action_delfolder($repo_abspath, $curdir_relpath, &$returned_text, &$text_type);
+		$returned_value = wpfib_action_delfolder($repo_abspath, $curdir_relpath, $returned_text, $text_type);
 	}
 	
 	// deleting a file
 	else if ($wpfib_access_rights[CAN_DELETE_FILES] && isset($_GET["delfile"]) && strlen($_GET["delfile"]))
 	{
-		$returned_value = wpfib_action_delfile($repo_abspath, $curdir_relpath, &$returned_text, &$text_type);
+		$returned_value = wpfib_action_delfile($repo_abspath, $curdir_relpath, $returned_text, $text_type);
 	}
 
 	// changing name to a folder
 	else if($wpfib_access_rights[CAN_RENAME_FOLDERS] && isset($_POST['old_foldername']) && strlen($_POST['old_foldername']) > 0 &&
        			 isset($_POST['new_foldername']) && strlen($_POST['new_foldername']) > 0)
 	{
-		$returned_value = wpfib_action_renfolder($repo_abspath, $curdir_relpath, &$returned_text, &$text_type);
+		$returned_value = wpfib_action_renfolder($repo_abspath, $curdir_relpath, $returned_text, $text_type);
 	}
 	
 	// changing name to a file
 	else if($wpfib_access_rights[CAN_RENAME_FILES] && isset($_POST['old_filename']) && strlen($_POST['old_filename']) > 0 &&
 		       	isset($_POST['new_filename']) && strlen($_POST['new_filename']) > 0)
 	{
-		$returned_value = wpfib_action_renfile($repo_abspath, $curdir_relpath, &$returned_text, &$text_type);
+		$returned_value = wpfib_action_renfile($repo_abspath, $curdir_relpath, $returned_text, $text_type);
 	}
 	
 	// creating a new directory
 	else if($wpfib_access_rights[CAN_CREATE_FOLDERS] && isset($_POST['userdir']) && strlen($_POST['userdir']) > 0)
 	{
-		$returned_value = wpfib_action_newfolder($repo_abspath, $curdir_relpath, &$returned_text, &$text_type);
+		$returned_value = wpfib_action_newfolder($repo_abspath, $curdir_relpath, $returned_text, $text_type);
 	}
 
 	// HTML upload : main handler
 	else if($wpfib_access_rights[CAN_UPLOAD] && isset($_FILES['userfile']['name']) && strlen($_FILES['userfile']['name']) > 0)
 	{
-		$returned_value = wpfib_action_html_upload_main_handler($repo_abspath, $curdir_relpath, &$returned_text, &$text_type);
+		$returned_value = wpfib_action_html_upload_main_handler($repo_abspath, $curdir_relpath, $returned_text, $text_type);
 	}
 	
 	// HTML upload : manage conflict in case of upload of a file with the same name of an existing file
 	else if($wpfib_access_rights[CAN_UPLOAD] && (isset($_GET['keep_existing_file']) || isset($_GET['override_file']) || isset($_GET['archive_file'])))
 	{
-		$returned_value = wpfib_action_html_upload_manage_conflict($repo_abspath, $curdir_relpath, &$returned_text, &$text_type);
+		$returned_value = wpfib_action_html_upload_manage_conflict($repo_abspath, $curdir_relpath, $returned_text, $text_type);
 	}
 	
 	// if asking to restore an archived file
 	else if ($wpfib_access_rights[CAN_RESTORE_FILES] && isset($_GET["restorefile"]) && strlen($_GET["restorefile"]))
 	{
-		$returned_value = wpfib_action_restorefile($repo_abspath, $curdir_relpath, &$returned_text, &$text_type);
+		$returned_value = wpfib_action_restorefile($repo_abspath, $curdir_relpath, $returned_text, $text_type);
 	}
 	
 	// if asking to extract a file
 	else if ($wpfib_options['allow_unzip'] && $wpfib_access_rights[CAN_UNZIP_FILES] && isset($_GET["unzipfile"]) && strlen($_GET["unzipfile"]))
 	{
-		$returned_value = wpfib_action_unzipfile($repo_abspath, $curdir_relpath, &$returned_text, &$text_type);
+		$returned_value = wpfib_action_unzipfile($repo_abspath, $curdir_relpath, $returned_text, $text_type);
 	}
 	
 	// IF NO ACTION REQUEST DETECTED
@@ -1509,7 +1509,7 @@ function wpfib_set_hidden_elements()
 	$wpfib_hidden_files = preg_split("/[\s,]+/", $hidden_files_string);
 }
 
-function wpfib_get_dirs_and_files($repo_abspath, $curdir_relpath, $dirs, $files, $error_text)
+function wpfib_get_dirs_and_files($repo_abspath, $curdir_relpath, &$dirs, &$files, &$error_text)
 {
 	global $wpfib_options;
 	
@@ -1602,17 +1602,17 @@ function wpfib_get_dirs_and_files($repo_abspath, $curdir_relpath, $dirs, $files,
 	// sort files and folders
 	if (isset($_GET["sort_as"]) && isset($_GET["sort_by"]))
 	{
-		wpfib_sort_files_and_dirs(&$files, &$dirs, $_GET["sort_as"], $_GET["sort_by"]);
+		wpfib_sort_files_and_dirs($files, $dirs, $_GET["sort_as"], $_GET["sort_by"]);
 	}
 	else
 	{
-		wpfib_sort_files_and_dirs(&$files, &$dirs);
+		wpfib_sort_files_and_dirs($files, $dirs);
 	}
 	
 	return true;
 }
 
-function wpfib_render_filter_row($curdir_relpath, $dirs, $files)
+function wpfib_render_filter_row($curdir_relpath, &$dirs, &$files)
 {
 	global $wpfib_baselink;
 	global $wpfib_options;
@@ -1666,7 +1666,7 @@ function wpfib_render_filter_row($curdir_relpath, $dirs, $files)
 }
 
 // the top div hosts the navigation bar and
-function wpfib_render_top_div($text, $repo_abspath, $curdir_relpath)
+function wpfib_render_top_div(&$text, $repo_abspath, $curdir_relpath)
 {
 	global $wpfib_options;
 	global $wpfib_baselink;
@@ -1763,7 +1763,7 @@ function wpfib_render_files_div(&$text, $repo_abspath, $curdir_relpath, &$dirs, 
 	// detects if we are inside the web root and determine the relative dir
 	$dir_relpath = "";
 	$base_url = "";
-	$is_dir_in_webroot = wpfib_is_in_webroot($dir, &$dir_relpath, &$base_url);
+	$is_dir_in_webroot = wpfib_is_in_webroot($dir, $dir_relpath, $base_url);
 	if ($wpfib_options['DEBUG_enabled'])
 	{
 		echo "DIR ABSPATH = ".$dir."<br />";
@@ -1777,7 +1777,7 @@ function wpfib_render_files_div(&$text, $repo_abspath, $curdir_relpath, &$dirs, 
 	$rowColspan = 7;
 
 	$text .= "<table>"
-		.wpfib_render_filter_row($curdir_relpath, &$dirs, &$files)
+		.wpfib_render_filter_row($curdir_relpath, $dirs, $files)
 		."<tr class='row header'>";
                 
 	// CELL 1 (files icon | header row)
@@ -2195,7 +2195,7 @@ function wpfib_render_files_div(&$text, $repo_abspath, $curdir_relpath, &$dirs, 
 	return true;
 }
 
-function wpfib_render_archive_div($text, $repo_abspath, $curdir_relpath, $dirs, $files)
+function wpfib_render_archive_div(&$text, $repo_abspath, $curdir_relpath, &$dirs, &$files)
 {
 	global $wpfib_options;
 	global $wpfib_baselink;
@@ -2236,7 +2236,7 @@ function wpfib_is_archive($dir_relpath)
 
 // this function detects if the $dir_abspath variable contains a path inside the webroot
 // or not, and returns a boolean, but writes into $webroot the detected web root 
-function wpfib_is_in_webroot($dir_abspath, $dir_relpath, $base_url)
+function wpfib_is_in_webroot($dir_abspath, &$dir_relpath, &$base_url)
 {
 	global $wpfib_options;
 	
@@ -2274,7 +2274,7 @@ function wpfib_is_in_webroot($dir_abspath, $dir_relpath, $base_url)
 	}
 }
 
-function wpfib_render_actions_div($text, $repo_abspath, $curdir_relpath)
+function wpfib_render_actions_div(&$text, $repo_abspath, $curdir_relpath)
 {
 	global $wpfib_access_rights;
 
@@ -2359,7 +2359,7 @@ function wpfib_render_actions_div($text, $repo_abspath, $curdir_relpath)
 	return true;
 }
 
-function wpfib_render_bottom_div($text, $repo_abspath, $curdir_relpath)
+function wpfib_render_bottom_div(&$text, $repo_abspath, $curdir_relpath)
 {
 	global $wpfib_access_rights;
 	
@@ -2394,10 +2394,10 @@ function wpfib_render_bottom_div($text, $repo_abspath, $curdir_relpath)
 
 	// small icon with link to site and title containing copyright and version number
 //		$credits_icon = "<td class='right_aligned'><a href='http://www.smallerik.com' target='_blank'>"
-//					   ."<img src=\"".$wpfib_imgdirNavigation."wpfib.png\" border='0' title=\"".sprintf(__('WP File Browser v.%s - Copyright 2012 Enrico Sandoli'), $wpfib_version_number)."\" /></a>"
+//					   ."<img src=\"".$wpfib_imgdirNavigation."wpfib.png\" border='0' title=\"".sprintf(__('WP File Browser v.%s - Copyright 2012-2014 Enrico Sandoli'), $wpfib_version_number)."\" /></a>"
 //					   ."</td>";
 		$credits_icon = "<td class='right_aligned'>"
-					   ."<img src=\"".$wpfib_imgdirNavigation."wpfib.png\" border='0' title=\"".sprintf(__('WP File Browser v.%s - Copyright 2012 Enrico Sandoli'), $wpfib_version_number)."\" />"
+					   ."<img src=\"".$wpfib_imgdirNavigation."wpfib.png\" border='0' title=\"".sprintf(__('WP File Browser v.%s - Copyright 2012-2014 Enrico Sandoli'), $wpfib_version_number)."\" />"
 					   ."</td>";
 
 	// set display actions link(s): distinguish case of cookie set (the cookie is the same, so only one box is open at any one time) or not set
@@ -2470,7 +2470,7 @@ function wpfib_render_bottom_div($text, $repo_abspath, $curdir_relpath)
 
 // all html code created by the plugin is wrapped around a div with id JS_MAIN_DIV
 // the rest is contained in 4 div tags whose ids are JS_TOP_DIV, JS_FILES_DIV, JS_ACTIONS_DIV, JS_BOTTOM_DIV
-function wpfib_display_repository($text, $repo_abspath, $curdir_relpath, $error_text)
+function wpfib_display_repository(&$text, $repo_abspath, $curdir_relpath, &$error_text)
 {
 	global $wpfib_options;
 	global $wpfib_baselink;
@@ -2485,7 +2485,7 @@ function wpfib_display_repository($text, $repo_abspath, $curdir_relpath, $error_
 	// get the sorted arrays of files and folders
 	$dirs = array();
 	$files = array();
-	if (!wpfib_get_dirs_and_files($repo_abspath, $curdir_relpath, &$dirs, &$files, &$error_text))
+	if (!wpfib_get_dirs_and_files($repo_abspath, $curdir_relpath, $dirs, $files, $error_text))
 	{
 		return false;
 	}
@@ -2521,31 +2521,31 @@ function wpfib_display_repository($text, $repo_abspath, $curdir_relpath, $error_
 
 	
     // render JS_TOP_DIV
-	if (!wpfib_render_top_div(&$text, $repo_abspath, $curdir_relpath))
+	if (!wpfib_render_top_div($text, $repo_abspath, $curdir_relpath))
 	{
 		return false;
 	}
 
     // render JS_FILES_DIV
-	if (!wpfib_render_files_div(&$text, $repo_abspath, $curdir_relpath, &$dirs, &$files))
+	if (!wpfib_render_files_div($text, $repo_abspath, $curdir_relpath, $dirs, $files))
 	{
 		return false;
 	}
 
 	// render JS_ARCHIVE_DIV
-	if (!wpfib_render_archive_div(&$text, $repo_abspath, $curdir_relpath, &$dirs, &$files))
+	if (!wpfib_render_archive_div($text, $repo_abspath, $curdir_relpath, $dirs, $files))
 	{
 		return false;
 	}
 
 	// render JS_ACTIONS_DIV
-	if (!wpfib_render_actions_div(&$text, $repo_abspath, $curdir_relpath))
+	if (!wpfib_render_actions_div($text, $repo_abspath, $curdir_relpath))
 	{
 		return false;
 	}
 	
 	// render JS_BOTTOM_DIV
-	if (!wpfib_render_bottom_div(&$text, $repo_abspath, $curdir_relpath))
+	if (!wpfib_render_bottom_div($text, $repo_abspath, $curdir_relpath))
 	{
 		return false;
 	}
@@ -2826,6 +2826,10 @@ function wpfib_display_repository($text, $repo_abspath, $curdir_relpath, $error_
             ."	padding:0px 10px 0px 0px;"
 			."}	"
 
+			."#JS_FILES_DIV td.filterIconTick input[type=image] {"
+            ."	padding:0px;"
+			."}	"
+
             // for JS_ARCHIVE_DIV elements
                         
 			."#JS_ARCHIVE_DIV {"
@@ -2877,7 +2881,11 @@ function wpfib_display_repository($text, $repo_abspath, $curdir_relpath, $error_
 			."#JS_ACTIONS_DIV td.actionIcon {"
 			."	text-align:center;"
 			."	width:25px;"
-                        ."	padding:0px 5px 0px 5px;"
+            ."	padding:0px 5px 0px 5px;"
+			."}	"
+
+			."#JS_ACTIONS_DIV td.actionIcon input[type=image] {"
+            ."	padding:0px;"
 			."}	"
 
             // for JS_BOTTOM_DIV
@@ -2970,7 +2978,7 @@ function wpfib_display_repository($text, $repo_abspath, $curdir_relpath, $error_
 		return $css;
 	}
 
-	function wpfib_sort_files_and_dirs($files, $dirs, $sort_as = 0, $sort_by = 0)
+	function wpfib_sort_files_and_dirs(&$files, &$dirs, $sort_as = 0, $sort_by = 0)
 	{
 		global $wpfib_options;
 		global $wpfib_cur_sort_by;
