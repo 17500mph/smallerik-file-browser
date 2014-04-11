@@ -53,3 +53,9 @@ Please notice that the repository will only be displayed when the article is vie
 = Version 1.0 =
 
 * Initial revision
+
+== Upgrade Notice ==
+
+= Version 1.1 =
+This version fixes a fatal error Call By Reference on new PHP versions
+
