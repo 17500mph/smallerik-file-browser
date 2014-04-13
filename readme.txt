@@ -57,5 +57,5 @@ Please notice that the repository will only be displayed when the article is vie
 == Upgrade Notice ==
 
 = Version 1.1 =
-This version fixes a fatal error Call By Reference on new PHP versions
+This version fixes a fatal error Call By Reference on PHP from version 5.4
 
